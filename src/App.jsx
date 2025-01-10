@@ -1,16 +1,27 @@
-import { useState, createContext } from 'react';
+import { useState, createContext, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar/NavBar';
 import Landing from './components/Landing/Landing';
 import Dashboard from './components/Dashboard/Dashboard';
 import SignupForm from './components/SignupForm/SignupForm';
 import SigninForm from './components/SigninForm/SigninForm';
-import * as authService from '../src/services/authService'; // import the authservice
+import * as authService from '../src/services/authService';
+import HopshopList from './components/HopshopList/HopshopList';
+import * as hopshopService from './services/hopshopService';
 
 export const AuthedUserContext = createContext(null);
 
 const App = () => {
-  const [user, setUser] = useState(authService.getUser()); // using the method from authservice
+  const [user, setUser] = useState(authService.getUser());
+  const [hopshops, setHopshops] = useState([]);
+
+  useEffect(() => {
+    const fetchAllHopshops = async () => {
+      const hopshopsData = await hopshopService.index();
+      setHopshops(hopshopsData);
+    };
+    if (user) fetchAllHopshops();
+  }, [user]);
 
   const handleSignout = () => {
     authService.signout();
@@ -23,7 +34,10 @@ const App = () => {
         <NavBar user={user} handleSignout={handleSignout} />
         <Routes>
           {user ? (
-            <Route path="/" element={<Dashboard user={user} />} />
+            <>
+              <Route path="/" element={<Dashboard user={user} />} />
+              <Route path="/hopshops" element={<HopshopList hopshops={hopshops} />} />
+            </>
           ) : (
             <Route path="/" element={<Landing />} />
           )}
