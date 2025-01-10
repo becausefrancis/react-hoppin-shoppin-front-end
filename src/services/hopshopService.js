@@ -10,5 +10,32 @@ const index = async () => {
       console.log(error);
     }
 };
+
+const show = async (hopshopId) => {
+    try {
+      const res = await fetch(`${BASE_URL}/${hopshopId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      return res.json();
+    } catch (error) {
+      console.log(error);
+    }
+};
+
+const create = async (hopshopFormData) => {
+    try {
+      const res = await fetch(BASE_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(hopshopFormData),
+      });
+      return res.json();
+    } catch (error) {
+      console.log(error);
+    }
+};
   
-export { index };
+export { index, show, create };

@@ -1,5 +1,5 @@
 import { useState, createContext, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import NavBar from './components/NavBar/NavBar';
 import Landing from './components/Landing/Landing';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -8,12 +8,15 @@ import SigninForm from './components/SigninForm/SigninForm';
 import * as authService from '../src/services/authService';
 import HopshopList from './components/HopshopList/HopshopList';
 import * as hopshopService from './services/hopshopService';
+import HopshopDetails from './components/HopshopDetails/HopshopDetails';
+import HopshopForm from './components/HopshopForm/HopshopForm';
 
 export const AuthedUserContext = createContext(null);
 
 const App = () => {
   const [user, setUser] = useState(authService.getUser());
   const [hopshops, setHopshops] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAllHopshops = async () => {
@@ -22,6 +25,12 @@ const App = () => {
     };
     if (user) fetchAllHopshops();
   }, [user]);
+
+  const handleAddHopshop = async (hopshopFormData) => {
+    const newHopshop = await hopshopService.create(hopshopFormData);
+    setHopshops([newHopshop, ...hopshops]);
+    navigate('/hopshops');
+  };
 
   const handleSignout = () => {
     authService.signout();
@@ -37,6 +46,10 @@ const App = () => {
             <>
               <Route path="/" element={<Dashboard user={user} />} />
               <Route path="/hopshops" element={<HopshopList hopshops={hopshops} />} />
+              <Route path="/hopshops/:hopshopId" element={<HopshopDetails />} />
+              <Route path="/hopshops/new" 
+                element={<HopshopForm handleAddHopshop={handleAddHopshop} />} 
+              />
             </>
           ) : (
             <Route path="/" element={<Landing />} />
